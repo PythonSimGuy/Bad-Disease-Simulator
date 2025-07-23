@@ -112,7 +112,7 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
     clock = pygame.time.Clock()
     screen = pygame.display.set_mode((x * pixel, y * pixel))
     pygame.display.set_caption('Virus simulator')
-    font = pygame.font.SysFont('Arial', 40)
+    font = pygame.font.SysFont('Arial', 25)
     running = True
 
     #COLORS
@@ -135,6 +135,8 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
 
     #humans maker
     infected = []
+    healthy = []
+    recovered = []
     human_pos_block = []
     infected_positions = []
     humans = dict()
@@ -149,6 +151,8 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
     for i in range(humanss + initial_infected):
         infected_positions.append((0, 0))
         infected.append(0)
+        healthy.append(0)
+        recovered.append(0)
     
     #zombies
     for i in range(initial_infected):
@@ -158,9 +162,14 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
 
     while running:
         clock.tick(15)
-        pygame.draw.rect(screen, B, pygame.Rect(0, 0, pixel * 12, pixel * 10))
-        letter_surface = font.render((f'{sum(infected)}'), True, (250, 250, 250))
+        pygame.draw.rect(screen, B, pygame.Rect(0, 0, pixel * 8, pixel * 21))
+        letter_surface = font.render((f'{sum(infected)}'), True, (RED))
         screen.blit(letter_surface, (pixel, pixel))
+        letter_surface = font.render((f'{sum(healthy)}'), True, (GREEN))
+        screen.blit(letter_surface, (pixel, pixel * 8))
+        letter_surface = font.render((f'{sum(recovered)}'), True, (BLUE))
+        screen.blit(letter_surface, (pixel, pixel * 16))
+
         for i in range(2):  #envi draw
             result = (houses if i == 1 else hospitals)
             for pos in result:
@@ -202,12 +211,20 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
             human_pos_block[i] = (h_x, h_y)
             humans[i][0] = (human[0][0] + h_x, human[0][1] + h_y)
             if human[1] == 1:
+                healthy[i] = 1
+                recovered[i] = 0
                 pygame.draw.rect(screen, HUMAN, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel - 1, pixel - 1))
             elif human[1] <= 0 and human[1] > -3:
+                healthy[i] = 1
+                recovered[i] = 0
                 pygame.draw.rect(screen, GREEN, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel - 1, pixel - 1))
             elif human[1] <= -3:
+                recovered[i] = 1
+                healthy[i] = 0
                 pygame.draw.rect(screen, BLUE, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel - 1, pixel - 1))
             else:
+                recovered[i] = 0
+                healthy[i] = 0
                 pygame.draw.rect(screen, RED, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel, pixel))
 
         for event in pygame.event.get():    #event loop
