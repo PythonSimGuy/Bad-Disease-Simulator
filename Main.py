@@ -10,7 +10,7 @@ pixel = 5
 def home_screen():
     houses = int(input('Houses: '))
     if houses == 69:
-        return 60, 10, 320, 10, 20, 5, -1, 0 #type '69' for automatic values
+        return 60, 10, 320, 35, 20, 5, -1, 0 #type '69' for automatic values
     hospitals = int(input('Hospitals: '))
     humans = int(input('Humans: '))
     infection_length = int(input('Infection length: '))
@@ -166,7 +166,7 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
 
         #Graph over time
         if i > (x * pixel) * 2:
-            i = i - (x * pixel)
+            i = i - ((x * pixel) * 2)
         H = sum(normal) / len(humans) * 19
         G = sum(healthy) / len(humans) * 19
         B = sum(recovered) / len(humans) * 19
