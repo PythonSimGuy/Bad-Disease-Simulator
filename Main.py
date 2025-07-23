@@ -4,13 +4,13 @@ import pygame
 from numba import njit
 
 x = 230
-y = 130
+y = 115
 pixel = 5
 
 def home_screen():
     houses = int(input('Houses: '))
     if houses == 69:
-        return 60, 10, 320, 10, 20, 5, -1, 0 #type '69' for default values
+        return 60, 10, 320, 10, 20, 5, -1, 5 #type '69' for automatic values
     hospitals = int(input('Hospitals: '))
     humans = int(input('Humans: '))
     infection_length = int(input('Infection length: '))
@@ -110,20 +110,19 @@ def in_contact(my_point, all_infected, sickness, infection_length):
 def main(housess, hospitalss, humanss, infection_length, infection_recovery_chance, initial_infected, hospital_medicine, hospital_willingness):
     pygame.init()
     clock = pygame.time.Clock()
-    screen = pygame.display.set_mode((x * pixel, y * pixel))
+    screen = pygame.display.set_mode((x * pixel, (y + 20) * pixel))
     pygame.display.set_caption('Virus simulator')
     font = pygame.font.SysFont('Arial', 25)
-    running = True
 
     #COLORS
-    B = (0, 0, 0)
+    BLACK = (0, 0, 0)
     HUMAN = (120, 120, 120)
     WHITE = (255, 255, 255)
     RED = (255, 30, 30)
     BLUE = (20, 20, 230)
     BROWN = (250, 175, 0)
-    GREEN = (0, 150, 0)
-    screen.fill(B)
+    GREEN = (30, 180, 30)
+    screen.fill(BLACK)
 
     #environment maker
     houses, hospitals = environment(housess, hospitalss)
@@ -137,13 +136,14 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
     infected = []
     healthy = []
     recovered = []
+    normal = []
     human_pos_block = []
     infected_positions = []
     humans = dict()
     for i in range(humanss):
         breeding = True
         while breeding: #human class breeder
-            randi = (random.randint(1, 230), random.randint(1, 130))
+            randi = (random.randint(1, x), random.randint(1, y))
             human_pos_block.append(randi)
             humans[i] = [randi, 1, objective(houses, hospitals, hospital_willingness), 8, 0]    #key = human number.  value = [coordinates, infection level]
             if cor_line(humans[i][0]) not in houses or cor_line(humans[i][0]) not in hospitals:
@@ -153,6 +153,7 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
         infected.append(0)
         healthy.append(0)
         recovered.append(0)
+        normal.append(0)
     
     #zombies
     for i in range(initial_infected):
@@ -160,15 +161,31 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
         human_pos_block.append(randi)
         humans[humanss + i] = [randi, 2, objective(houses, hospitals, hospital_willingness), 8, 1]  #first human is infected
 
-    while running:
+    for i in range (6969696969696969696969):
         clock.tick(15)
-        pygame.draw.rect(screen, B, pygame.Rect(0, 0, pixel * 8, pixel * 21))
+
+        #Graph over time
+        if i > (x * pixel) * 2:
+            i = i - (x * pixel)
+        H = sum(normal) / len(humans) * 19
+        G = sum(healthy) / len(humans) * 19
+        B = sum(recovered) / len(humans) * 19
+        R = sum(infected) / len(humans) * 19
+        pygame.draw.rect(screen, HUMAN, pygame.Rect(i / 2, (y + 1) * pixel, pixel, H * pixel))
+        pygame.draw.rect(screen, GREEN, pygame.Rect(i / 2, (y + 1) * pixel + (H * pixel), pixel, G * pixel))
+        pygame.draw.rect(screen, BLUE, pygame.Rect(i / 2, (y + 1) * pixel + (G * pixel) + (H * pixel), pixel, B * pixel + 1))
+        pygame.draw.rect(screen, RED, pygame.Rect(i / 2, (y + 1) * pixel + (G * pixel) + (B * pixel) + (H * pixel), pixel, R * pixel))
+
+        #human statistics
+        pygame.draw.rect(screen, BLACK, pygame.Rect(0, 0, pixel * 8, pixel * 30))
         letter_surface = font.render((f'{sum(infected)}'), True, (RED))
         screen.blit(letter_surface, (pixel, pixel))
         letter_surface = font.render((f'{sum(healthy)}'), True, (GREEN))
         screen.blit(letter_surface, (pixel, pixel * 8))
         letter_surface = font.render((f'{sum(recovered)}'), True, (BLUE))
         screen.blit(letter_surface, (pixel, pixel * 16))
+        letter_surface = font.render((f'{sum(normal)}'), True, (HUMAN))
+        screen.blit(letter_surface, (pixel, pixel * 24))
 
         for i in range(2):  #envi draw
             result = (houses if i == 1 else hospitals)
@@ -192,12 +209,9 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
             #human infection
             human[1] = in_contact(human[0], infected_positions, human[1], infection_length)
             if human[1] >= 2 and human[1] != infection_length: #if human is infected
-                infected_positions[i] = human[0]
-                infected[i] = 1
                 if choi == 0:
                     human[1] += 1
             elif human[1] == infection_length:  #if human is recovered and not infected
-                infected_positions[i] = (0, 0)
                 human[4] -= 1
                 human[1] = -1 + human[4]
                 infected[i] = 0
@@ -205,26 +219,36 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
                 infected[i] = 0
                 infected_positions[i] = (0, 0)
             
-            pygame.draw.rect(screen, B, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel, pixel))
+            pygame.draw.rect(screen, BLACK, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel, pixel))
             blocks = (human_pos_block)
             h_x, h_y = movement(human[0], human[2], blocks)
             human_pos_block[i] = (h_x, h_y)
             humans[i][0] = (human[0][0] + h_x, human[0][1] + h_y)
             if human[1] == 1:
-                healthy[i] = 1
+                healthy[i] = 0
                 recovered[i] = 0
+                infected[i] = 0
+                normal[i] = 1
                 pygame.draw.rect(screen, HUMAN, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel - 1, pixel - 1))
             elif human[1] <= 0 and human[1] > -3:
                 healthy[i] = 1
                 recovered[i] = 0
+                infected[i] = 0
+                normal[i] = 0
                 pygame.draw.rect(screen, GREEN, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel - 1, pixel - 1))
             elif human[1] <= -3:
                 recovered[i] = 1
                 healthy[i] = 0
+                infected[i] = 0
+                normal[i] = 0
+                infected_positions[i] = (0, 0)
                 pygame.draw.rect(screen, BLUE, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel - 1, pixel - 1))
             else:
                 recovered[i] = 0
                 healthy[i] = 0
+                infected[i] = 1
+                normal[i] = 0
+                infected_positions[i] = human[0]
                 pygame.draw.rect(screen, RED, pygame.Rect(human[0][0] * pixel, human[0][1] * pixel, pixel, pixel))
 
         for event in pygame.event.get():    #event loop
