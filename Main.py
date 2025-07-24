@@ -1,7 +1,5 @@
 import random
-import numpy as np
 import pygame
-from numba import njit
 
 x = 230
 y = 115
@@ -10,7 +8,7 @@ pixel = 5
 def home_screen():
     houses = int(input('Houses: '))
     if houses == 69:
-        return 60, 10, 320, 35, 20, 5, -1, 0 #type '69' for automatic values
+        return 60, 10, 320, 20, 20, 5, -1, 1 #type '69' for automatic values
     hospitals = int(input('Hospitals: '))
     humans = int(input('Humans: '))
     infection_length = int(input('Infection length: '))
@@ -26,20 +24,10 @@ def objective(houses, hospitals, hospital_willingness):
         return (random.randint(1, x), random.randint(1, y))
     elif choice >= 4 and choice <= 7:
         house_of_choice = random.choice(houses)
-        return (cor_trans(house_of_choice)[0], (cor_trans(house_of_choice)[1] + 1))
+        return (house_of_choice[0], house_of_choice[1] + 1)
     elif choice >= 8:
         hospital_of_choice = random.choice(hospitals)
-        return (cor_trans(hospital_of_choice)[0], (cor_trans(hospital_of_choice)[1]))
-
-@njit
-def cor_trans(coordinate):
-    y_pos = coordinate // x
-    x_pos = coordinate - (y_pos * x)
-    return (int(x_pos), int(y_pos))
-
-@njit
-def cor_line(coordinates):
-    return (coordinates[1] *230) + coordinates[0]
+        return (hospital_of_choice[0], hospital_of_choice[1])
 
 def movement(current_position, target, blocks) -> tuple:
     choi = random.randint(0, 15)
@@ -71,20 +59,20 @@ def environment(h, ho):
     houses = h
     hospitals = ho
 
-    house_pos = np.zeros(houses)
-    hospital_pos = np.zeros(hospitals)
+    house_pos = [0 for h in range(houses)]
+    hospital_pos = [0 for h in range(hospitals)]
 
     for idx in range(houses):
         found_coordinates = False
         while not found_coordinates:
-            random_location = np.random.randint(1, (x * y))
+            random_location = (random.randint(1, x), random.randint(1, y))
             if random_location not in house_pos and random_location not in hospital_pos:
                 found_coordinates = True
                 house_pos[idx] = random_location
     for idx in range(hospitals):
         found_coordinates = False
         while not found_coordinates:
-            random_location = np.random.randint(1, (x * y))
+            random_location = (random.randint(1, x), random.randint(1, y))
             if random_location not in house_pos and random_location not in hospital_pos:
                 found_coordinates = True
                 hospital_pos[idx] = random_location
@@ -129,7 +117,7 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
     for i in range(2):
         result = (houses if i == 1 else hospitals)
         for pos in result:
-            cors = cor_trans(pos)
+            cors = pos
             pygame.draw.rect(screen, (BROWN if i == 1 else WHITE), (cors[0] * pixel, cors[1] * pixel,2*pixel,(pixel if i == 1 else 2*pixel)))
 
     #humans maker
@@ -146,7 +134,7 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
             randi = (random.randint(1, x), random.randint(1, y))
             human_pos_block.append(randi)
             humans[i] = [randi, 1, objective(houses, hospitals, hospital_willingness), 8, 0]    #key = human number.  value = [coordinates, infection level]
-            if cor_line(humans[i][0]) not in houses or cor_line(humans[i][0]) not in hospitals:
+            if humans[i][0] not in houses or humans[i][0] not in hospitals:
                 breeding = False
     for i in range(humanss + initial_infected):
         infected_positions.append((0, 0))
@@ -171,10 +159,10 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
         G = sum(healthy) / len(humans) * 19
         B = sum(recovered) / len(humans) * 19
         R = sum(infected) / len(humans) * 19
-        pygame.draw.rect(screen, HUMAN, pygame.Rect(i / 2, (y + 1) * pixel, pixel, H * pixel))
-        pygame.draw.rect(screen, GREEN, pygame.Rect(i / 2, (y + 1) * pixel + (H * pixel), pixel, G * pixel))
-        pygame.draw.rect(screen, BLUE, pygame.Rect(i / 2, (y + 1) * pixel + (G * pixel) + (H * pixel), pixel, B * pixel + 1))
-        pygame.draw.rect(screen, RED, pygame.Rect(i / 2, (y + 1) * pixel + (G * pixel) + (B * pixel) + (H * pixel), pixel, R * pixel))
+        pygame.draw.rect(screen, HUMAN, pygame.Rect(i / 2, (y + 1) * pixel + 1, pixel, H * pixel))
+        pygame.draw.rect(screen, GREEN, pygame.Rect(i / 2, (y + 1) * pixel + 1 + (H * pixel), pixel, G * pixel))
+        pygame.draw.rect(screen, BLUE, pygame.Rect(i / 2, (y + 1) * pixel + 1 + (G * pixel) + (H * pixel), pixel, B * pixel + 1))
+        pygame.draw.rect(screen, RED, pygame.Rect(i / 2, (y + 1) * pixel + 1 + (G * pixel) + (B * pixel) + (H * pixel), pixel, R * pixel))
 
         #human statistics
         pygame.draw.rect(screen, BLACK, pygame.Rect(0, 0, pixel * 8, pixel * 30))
@@ -190,11 +178,11 @@ def main(housess, hospitalss, humanss, infection_length, infection_recovery_chan
         for i in range(2):  #envi draw
             result = (houses if i == 1 else hospitals)
             for pos in result:
-                cors = cor_trans(pos)
+                cors = pos
                 pygame.draw.rect(screen, (BROWN if i == 1 else WHITE), (cors[0] * pixel, cors[1] * pixel,2*pixel,(pixel if i == 1 else 2*pixel)))
 
         for i, human in enumerate(humans.values()): #human loop
-            if cor_line(human[0]) in hospitals and human[1] != infection_length:  #if human is at the hospital and not infected
+            if human[0] in hospitals and human[1] >= hospital_effectiveness:  #if human is at the hospital and not infected
                 human[1] = hospital_medicine
                 human[4] -= 1
 
