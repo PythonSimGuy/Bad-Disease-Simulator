@@ -8,7 +8,7 @@ pixel = 5
 def home_screen():
     houses = int(input('Houses: '))
     if houses == 69:
-        return 60, 10, 320, 20, 20, 5, -1, 1 #type '69' for automatic values
+        return 100, 25, 400, 20, 20, 10, -1, 1 #type '69' for automatic values
     hospitals = int(input('Hospitals: '))
     humans = int(input('Humans: '))
     infection_length = int(input('Infection length: '))
