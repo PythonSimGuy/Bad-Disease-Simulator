@@ -47,10 +47,10 @@ def movement(current_position, target, blocks) -> tuple:
     closest_move, distance = up, 99999
     for move in moves:
         new_pos = (x + move[0], y + move[1])
-        type_shi = abs(target[0] - new_pos[0]) + abs(target[1] - new_pos[1]) #distance from target
+        total = abs(target[0] - new_pos[0]) + abs(target[1] - new_pos[1]) #distance from target
         if new_pos not in blocks:
-            if type_shi < distance:
-                distance = type_shi
+            if total < distance:
+                distance = total
                 closest_move = move
     return closest_move
 
